@@ -1,0 +1,352 @@
+{
+  "name": "Expat Research Synthesis Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "03a7a562-a9c9-4a7f-8cda-dfa2803463af",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "operation": "getMarkdown",
+        "blockId": {
+          "__rl": true,
+          "value": "3d78b29b6000809db6a5cf7f8e094c85",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "9595f3e2-a0f7-46e1-9fe3-544567147767",
+      "name": "Product Idea",
+      "credentials": {
+        "notionApi": {
+          "id": "tPxCi8udVExfk4Oo",
+          "name": "Notion account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "operation": "getMarkdown",
+        "blockId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "3d78b29b600080c3aa1ac8aef7b04499",
+          "__regex": "^([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})"
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "457a9609-3d2e-442d-b57a-e2a7e522ccd8",
+      "name": "Product Assumptions",
+      "credentials": {
+        "notionApi": {
+          "id": "tPxCi8udVExfk4Oo",
+          "name": "Notion account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "operation": "getMarkdown",
+        "blockId": {
+          "__rl": true,
+          "value": "3d78b29b600080c997dadbc066cf8327",
+          "mode": "id",
+          "__regex": "^([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})"
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        672,
+        0
+      ],
+      "id": "0f83088b-3c3d-4218-93ae-08fc9a214eef",
+      "name": "Personas",
+      "credentials": {
+        "notionApi": {
+          "id": "tPxCi8udVExfk4Oo",
+          "name": "Notion account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "operation": "getMarkdown",
+        "blockId": {
+          "__rl": true,
+          "value": "3d78b29b6000809e81f6ca8104cd772b",
+          "mode": "id",
+          "__regex": "^([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})"
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        896,
+        0
+      ],
+      "id": "31446589-21c8-452b-a9ac-632ae6b3213d",
+      "name": "Interview questions",
+      "credentials": {
+        "notionApi": {
+          "id": "tPxCi8udVExfk4Oo",
+          "name": "Notion account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "operation": "getMarkdown",
+        "blockId": {
+          "__rl": true,
+          "value": "3d78b29b600080f49b66cb4005318fb3",
+          "mode": "id",
+          "__regex": "^([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})"
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "5af6df51-fd93-460b-a252-a5f93cf9ed85",
+      "name": "Interview answers",
+      "credentials": {
+        "notionApi": {
+          "id": "tPxCi8udVExfk4Oo",
+          "name": "Notion account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const productIdea = $('Product Idea').item.json.markdown;\nconst assumptions = $('Product Assumptions').item.json.markdown;\nconst personas = $('Personas').item.json.markdown;\nconst questions = $('Interview questions').item.json.markdown;\nconst answers = $('Interview answers').item.json.markdown;\n\nconst researchDocument = `\n## Product Idea\n${productIdea}\n\n## Assumptions\n${assumptions}\n\n## Personas\n${personas}\n\n## Interview Questions\n${questions}\n\n## Interview Answers\n${answers}\n`;\n\nconst promptText = `You are a product research synthesis assistant. Given the research document below, determine whether the product idea is validated, partially validated, or not validated by the interview data. Also identify which stated assumptions are confirmed vs challenged by the data.\n\nResearch document:\n${researchDocument}\n\nRespond ONLY with valid JSON in this exact structure, no markdown formatting, no preamble, no code fences:\n{\n  \"validation_status\": \"Validated\" | \"Partially Validated\" | \"Not Validated\",\n  \"summary\": \"string\",\n  \"key_insights\": \"string\",\n  \"opportunities\": \"string\",\n  \"assumptions_confirmed\": \"string\",\n  \"assumptions_challenged\": \"string\"\n}`;\n\nreturn [{ json: {\n  model: \"claude-sonnet-5\",\n  max_tokens: 2000,\n  messages: [{ role: \"user\", content: promptText }]\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "36859c9b-8c7f-476c-b657-4793f3fe80ee",
+      "name": "Merge the 5 markdown outputs into one document"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1568,
+        0
+      ],
+      "id": "e4d3a4e5-ae13-4145-bc45-6294f6eeb97f",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PgNzY6tslAOtWcm3",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const blocks = $input.first().json.content;\nconst textBlock = blocks.find(b => b.type === 'text');\nconst raw = textBlock.text;\nconst cleaned = raw.replace(/```json|```/g, '').trim();\nconst parsed = JSON.parse(cleaned);\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        0
+      ],
+      "id": "5cc16ac2-1d4e-477b-8159-d00fe7c93407",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "   https://api.notion.com/v1/blocks/3d78b29b60008071beafc7773cd64cf6/children",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer Bearer YOUR_NOTION_TOKEN_HERE"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"children\": [\n    {\n      \"object\": \"block\",\n      \"type\": \"heading_2\",\n      \"heading_2\": { \"rich_text\": [{ \"text\": { \"content\": \"{{ $json.report_title }}\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"paragraph\",\n      \"paragraph\": { \"rich_text\": [{ \"text\": { \"content\": \"Validation status: {{ $json.validation_status }}\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"paragraph\",\n      \"paragraph\": { \"rich_text\": [{ \"text\": { \"content\": \"{{ $json.summary }}\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"heading_3\",\n      \"heading_3\": { \"rich_text\": [{ \"text\": { \"content\": \"Key Insights\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"paragraph\",\n      \"paragraph\": { \"rich_text\": [{ \"text\": { \"content\": \"{{ $json.key_insights }}\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"heading_3\",\n      \"heading_3\": { \"rich_text\": [{ \"text\": { \"content\": \"Opportunities\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"paragraph\",\n      \"paragraph\": { \"rich_text\": [{ \"text\": { \"content\": \"{{ $json.opportunities }}\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"heading_3\",\n      \"heading_3\": { \"rich_text\": [{ \"text\": { \"content\": \"Assumptions Confirmed\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"paragraph\",\n      \"paragraph\": { \"rich_text\": [{ \"text\": { \"content\": \"{{ $json.assumptions_confirmed }}\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"heading_3\",\n      \"heading_3\": { \"rich_text\": [{ \"text\": { \"content\": \"Assumptions Challenged\" } }] }\n    },\n    {\n      \"object\": \"block\",\n      \"type\": \"paragraph\",\n      \"paragraph\": { \"rich_text\": [{ \"text\": { \"content\": \"{{ $json.assumptions_challenged }}\" } }] }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2016,
+        0
+      ],
+      "id": "2d0ee5f3-8bb3-4b98-8e0d-2229e7e09810",
+      "name": "HTTP Request1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Product Idea",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product Idea": {
+      "main": [
+        [
+          {
+            "node": "Product Assumptions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product Assumptions": {
+      "main": [
+        [
+          {
+            "node": "Personas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Personas": {
+      "main": [
+        [
+          {
+            "node": "Interview questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interview questions": {
+      "main": [
+        [
+          {
+            "node": "Interview answers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interview answers": {
+      "main": [
+        [
+          {
+            "node": "Merge the 5 markdown outputs into one document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge the 5 markdown outputs into one document": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a79e49fc-ef55-4048-adc9-289e5759007e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "822aba0c2f956282c51be8dfeaad28460b75e2bc18fba7e434f8e8d6fe7779ac"
+  },
+  "nodeGroups": [],
+  "id": "lSR9e9fNSnIR8guG",
+  "tags": []
+}
