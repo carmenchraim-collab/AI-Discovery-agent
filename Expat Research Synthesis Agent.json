@@ -2,17 +2,6 @@
   "name": "Expat Research Synthesis Agent",
   "nodes": [
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ],
-      "id": "03a7a562-a9c9-4a7f-8cda-dfa2803463af",
-      "name": "When clicking ‘Execute workflow’"
-    },
-    {
       "parameters": {
         "resource": "block",
         "operation": "getMarkdown",
@@ -25,7 +14,7 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        224,
+        208,
         0
       ],
       "id": "9595f3e2-a0f7-46e1-9fe3-544567147767",
@@ -171,7 +160,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ $json }}",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-6\",\n  \"max_tokens\": 8000,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"YOUR PROMPT INSTRUCTIONS HERE\\n\\n---\\n{{ $json.markdown }}\"\n    }\n  ]\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -191,7 +180,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const blocks = $input.first().json.content;\nconst textBlock = blocks.find(b => b.type === 'text');\nconst raw = textBlock.text;\nconst cleaned = raw.replace(/```json|```/g, '').trim();\nconst parsed = JSON.parse(cleaned);\nreturn [{ json: parsed }];"
+        "jsCode": "const blocks = $input.first().json.content;\nconst textBlock = blocks.find(b => b.type === 'text');\nconst raw = textBlock.text;\nconst cleaned = raw.replace(/```json|```/g, '').trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (err) {\n  throw new Error(`JSON parse failed: ${err.message}\\n\\nText length: ${raw.length}\\nLast 300 chars: ...${raw.slice(-300)}`);\n}\n\nreturn [{ json: parsed }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -211,7 +200,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer Bearer YOUR_NOTION_TOKEN_HERE"
+              "value": "Bearer YOUR_NOTION_TOKEN_HERE"
             },
             {
               "name": "Notion-Version",
@@ -232,21 +221,26 @@
       ],
       "id": "2d0ee5f3-8bb3-4b98-8e0d-2229e7e09810",
       "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "30a6fa74-20a8-4805-bcc9-279bca4270c9",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "eb881dae-8305-4fc7-925a-7303b5ad66a2",
+      "name": "Webhook",
+      "webhookId": "30a6fa74-20a8-4805-bcc9-279bca4270c9"
     }
   ],
   "pinData": {},
   "connections": {
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Product Idea",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Product Idea": {
       "main": [
         [
@@ -334,14 +328,25 @@
           }
         ]
       ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Product Idea",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "a79e49fc-ef55-4048-adc9-289e5759007e",
+  "versionId": "dc8fb2b9-4a26-4a9d-b915-b133eec9fb6f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "822aba0c2f956282c51be8dfeaad28460b75e2bc18fba7e434f8e8d6fe7779ac"
